@@ -11,7 +11,7 @@ ProductTag.init(
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
-    }
+    },
   },
   {
     sequelize,
