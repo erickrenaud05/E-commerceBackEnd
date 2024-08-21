@@ -2,8 +2,6 @@ const router = require('express').Router();
 const { Category, Product } = require('../../models');
 
 router.get('/', async (req, res) => {
-  // find all categories
-  // be sure to include its associated Products
   try{
     const categories = await Category.findAll({
       include: Product,
@@ -19,13 +17,29 @@ router.get('/', async (req, res) => {
   } catch(err){
     res.status(500).json(err);
   }
-
-  console.log(categories)
 });
 
-router.get('/:id', (req, res) => {
-  // find one category by its `id` value
-  // be sure to include its associated Products
+router.get('/:id', async(req, res) => {
+  if(!isNaN(req.params.id)){
+    try{
+      const category = await Category.findByPk(req.params.id, {
+        include: Product,
+      });
+
+      if(!category){
+        res.status(404).json('Category not found!');
+        return;
+      }
+
+      res.status(200).json(category);
+      return;
+    } catch(err){
+      res.status(500).json(err);
+      return;
+    }
+  }
+
+  res.status(400).json('Invalid id');
 });
 
 router.post('/', (req, res) => {
