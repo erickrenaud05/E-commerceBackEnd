@@ -16,6 +16,7 @@ router.get('/', async (req, res) => {
     return;
   } catch(err){
     res.status(500).json(err);
+    return;
   }
 });
 
@@ -40,10 +41,31 @@ router.get('/:id', async(req, res) => {
   }
 
   res.status(400).json('Invalid id');
+  return;
 });
 
-router.post('/', (req, res) => {
-  // create a new category
+router.post('/', async(req, res) => {
+  if(!req.body.name){
+    res.status(400).json('Bad request');
+    return;
+  }
+  try{
+    const newCategory = await Category.create({
+      category_name: req.body.name,
+    });
+
+    if(!newCategory){
+      res.status(500).json('Internal server error');
+    }
+
+    res.status(201).json(newCategory);
+    return;
+    
+  } catch(err){
+    res.status(500).json('Internal server error');
+    return;
+  }
+
 });
 
 router.put('/:id', (req, res) => {
