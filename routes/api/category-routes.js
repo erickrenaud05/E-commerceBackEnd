@@ -49,6 +49,7 @@ router.post('/', async(req, res) => {
     res.status(400).json('Bad request');
     return;
   }
+  
   try{
     const newCategory = await Category.create({
       category_name: req.body.name,
@@ -94,8 +95,30 @@ router.put('/:id', async(req, res) => {
 
 });
 
-router.delete('/:id', (req, res) => {
-  // delete a category by its `id` value
+router.delete('/:id', async(req, res) => {
+  if(isNaN(req.params.id)){
+    res.status(400).json('Invalid id');
+    return;
+  }
+
+  try{
+    const deleteStatus = await Category.destroy({
+      where: {
+        id: req.params.id,
+      },
+    })
+
+    if(deleteStatus === 0){
+      res.status(400).json('Unable to delete category');
+      return;
+    }
+
+    res.status(200).json(deleteStatus);
+
+  }catch(err){
+    res.status(500).json('Internal server error');
+    return;
+  }
 });
 
 module.exports = router;
