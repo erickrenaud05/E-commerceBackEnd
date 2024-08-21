@@ -60,7 +60,7 @@ router.post('/', async(req, res) => {
 
     res.status(201).json(newCategory);
     return;
-    
+
   } catch(err){
     res.status(500).json('Internal server error');
     return;
@@ -68,8 +68,30 @@ router.post('/', async(req, res) => {
 
 });
 
-router.put('/:id', (req, res) => {
-  // update a category by its `id` value
+router.put('/:id', async(req, res) => {
+  if(isNaN(req.params.id) || !req.body.name){
+    res.status(400).json('invalid request');
+    return;
+  }
+
+  try{
+    const updatedCategory = await Category.update(
+      { category_name: req.body.name },
+      {
+        where: {
+          id: req.params.id,
+        },
+        returning: true,
+      },
+    );
+
+    res.status(200).json(updatedCategory);
+    return;
+  }catch(err){
+    res.status(500).json(err);
+    return;
+  }
+
 });
 
 router.delete('/:id', (req, res) => {
