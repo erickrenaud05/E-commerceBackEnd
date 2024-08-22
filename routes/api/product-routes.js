@@ -1,22 +1,59 @@
 const router = require('express').Router();
 const { Product, Category, Tag, ProductTag } = require('../../models');
 
-// The `/api/products` endpoint
+router.get('/', async(req, res) => {
+  try{
+    const allProducts = await Product.findAll({
+      include: [
+        Category,
+        {model: Tag, through: {ProductTag}},
+      ],
+    });
 
-// get all products
-router.get('/', (req, res) => {
-  // find all products
-  // be sure to include its associated Category and Tag data
+    if(!allProducts){
+      res.status(200).json('No products found');
+      return;
+    }
+    
+    res.status(200).json(allProducts);
+    return;
+  } catch(err){
+    res.status(500).json('Internal server error');
+    return;
+  }
+
 });
 
 // get one product
-router.get('/:id', (req, res) => {
-  // find a single product by its `id`
-  // be sure to include its associated Category and Tag data
+router.get('/:id', async(req, res) => {
+  if(isNaN(req.params.id)){
+    res.status(400).json('Invalid id');
+    return;
+  };
+
+  try{
+    const product = await Product.findByPk(req.params.id, {
+      include: [
+        Category,
+        {model: Tag, through: {ProductTag}},
+      ],
+    });
+
+    if(!product){
+      res.status(404).json('Product not found');
+      return;
+    }
+
+    res.status(200).json(product);
+    return;
+  } catch(err){
+    res.status(500).json(err);
+    return;
+  }
 });
 
 // create new product
-router.post('/', (req, res) => {
+router.post('/', async(req, res) => {
   /* req.body should look like this...
     {
       product_name: "Basketball",
@@ -48,7 +85,7 @@ router.post('/', (req, res) => {
 });
 
 // update product
-router.put('/:id', (req, res) => {
+router.put('/:id', async(req, res) => {
   // update product data
   Product.update(req.body, {
     where: {
@@ -92,8 +129,30 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
-  // delete one product by its `id` value
+router.delete('/:id', async(req, res) => {
+  if(isNaN(req.params.id)){
+    res.status(400).json('Invalid id');
+  }
+
+  try{
+    const deleteStatus = await Product.destroy({
+      where: {
+        id: req.params.id
+      },
+    });
+
+    
+    if(deleteStatus === 0){
+      res.status(400).json('Unable to delete category');
+      return;
+    }
+
+    res.status(200).json(deleteStatus);
+
+  }catch(err){
+    res.status(500).json('Internal server error');
+    return;
+  }
 });
 
 module.exports = router;
