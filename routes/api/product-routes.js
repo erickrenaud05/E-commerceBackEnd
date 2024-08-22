@@ -130,7 +130,29 @@ router.put('/:id', async(req, res) => {
 });
 
 router.delete('/:id', async(req, res) => {
-  // delete one product by its `id` value
+  if(isNaN(req.params.id)){
+    res.status(400).json('Invalid id');
+  }
+
+  try{
+    const deleteStatus = await Product.destroy({
+      where: {
+        id: req.params.id
+      },
+    });
+
+    
+    if(deleteStatus === 0){
+      res.status(400).json('Unable to delete category');
+      return;
+    }
+
+    res.status(200).json(deleteStatus);
+
+  }catch(err){
+    res.status(500).json('Internal server error');
+    return;
+  }
 });
 
 module.exports = router;
