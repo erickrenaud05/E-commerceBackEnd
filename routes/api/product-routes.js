@@ -5,9 +5,18 @@ router.get('/', async(req, res) => {
   try{
     const allProducts = await Product.findAll({
       include: [
-        Category,
-        {model: Tag, through: {ProductTag}},
+        {
+          model: Category,
+        },
+        {
+          model: Tag,
+          through: {
+            ProductTag,
+            attributes: { exclude: ['productId', 'tagId']},
+          }
+        },
       ],
+      attributes: { exclude: ['categoryId']},
     });
 
     if(!allProducts){
