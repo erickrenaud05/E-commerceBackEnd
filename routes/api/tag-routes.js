@@ -4,8 +4,6 @@ const { Tag, Product, ProductTag, Category } = require('../../models');
 // The `/api/tags` endpoint
 
 router.get('/', async(req, res) => {
-  // find all tags
-  // be sure to include its associated Product data
   try{
     const tags = await Tag.findAll({
       include: [
@@ -31,9 +29,35 @@ router.get('/', async(req, res) => {
   }
 });
 
-router.get('/:id', (req, res) => {
-  // find a single tag by its `id`
-  // be sure to include its associated Product data
+router.get('/:id', async(req, res) => {
+  if(isNaN(req.params.id)){
+    res.status(400).json('Invalid id');
+    return;
+  }
+
+  try{
+    const tag = await Tag.findByPk(req.params.id, {
+      include: [
+        {
+          model: Product, 
+          include: {model: Category}, 
+          attributes: {exclude: ['category_id', 'categoryId']},
+          through: {ProductTag, attributes: []},
+        },
+      ],
+    });
+
+    if(!tag){
+      res.status(404).json('Tag not found');
+      return;
+    }
+
+    res.status(200).json(tag);
+    return;
+  }catch(err){
+    res.status(500).json('Internal server error');
+    return
+  }
 });
 
 router.post('/', (req, res) => {
