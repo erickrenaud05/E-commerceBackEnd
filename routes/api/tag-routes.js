@@ -85,6 +85,7 @@ router.post('/', async(req, res) => {
 router.put('/:id', async(req, res) => {
   if(isNaN(req.params.id) || !req.body.name){
     res.status(400).json('Invalid request');
+    return;
   };
 
   try {
@@ -113,8 +114,30 @@ router.put('/:id', async(req, res) => {
   }
 });
 
-router.delete('/:id', (req, res) => {
-  // delete on tag by its `id` value
+router.delete('/:id', async(req, res) => {
+  if(isNaN(req.params.id)){
+    res.status(400).json('Invalid id');
+    return;
+  };
+
+  try {
+    const deleteStatus = await Tag.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+    
+    if(deleteStatus === 0){
+      res.status(500).json('Tag not deleted');
+      return;
+    };
+
+    res.status(200).json(deleteStatus);
+    return;
+  }catch (err) {
+    res.status(500).json('Internal server error');
+    return;
+  }
 });
 
 module.exports = router;
