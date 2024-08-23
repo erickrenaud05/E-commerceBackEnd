@@ -109,6 +109,7 @@ router.put('/:id', async(req, res) => {
     where: {
       id: req.params.id,
     },
+    returning: true,
   })
     .then((product) => {
       if (req.body.tagIds && req.body.tagIds.length) {
